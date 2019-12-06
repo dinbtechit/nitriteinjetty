@@ -12,13 +12,13 @@ Access Rest in cURL. (Alternatively, you can also use a browser or a REST client
 
 #### Inserting
 
-<small> Note - Remember the last entry only. </small>
+<small> Insert into memory</small>
 
 ```
 curl -v -X GET http://localhost:8080/api/db/memory/insert
 ```
 
-<small> Note - Works as expectred. </small>
+<small> Insert into file</small>
 
 ```bash
 curl -v -X GET http://localhost:8080/api/db/file/insert
@@ -27,13 +27,13 @@ curl -v -X GET http://localhost:8080/api/db/file/insert
 
 #### Finding
 
-<small> Note - Returns empty results </small>
+<small> Find from memory</small>
 
 ```
 curl -v -X GET http://localhost:8080/api/db/memory/find/0/10000
 ```
 
-<small> Note - Works as expectred. </small>
+<small> Find from file</small>
 
 ```bash
 curl -v -X GET http://localhost:8080/api/db/file/find/0/10000
