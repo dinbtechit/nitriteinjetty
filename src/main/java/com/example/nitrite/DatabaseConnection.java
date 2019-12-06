@@ -1,7 +1,6 @@
 package com.example.nitrite;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.WriteResult;
 import org.dizitart.no2.objects.ObjectRepository;
 
@@ -12,37 +11,29 @@ import static org.dizitart.no2.FindOptions.limit;
 
 public final class DatabaseConnection {
 
-    private static Nitrite DB;
-    private static DatabaseConnection DB_CONN;
+    private static final DatabaseConnection DB_MEMORY_CONN = new DatabaseConnection();
+    private static final DatabaseConnection DB_FILE_CONN = new DatabaseConnection("test.db");
 
-    private static ObjectRepository<Employee> REPOSITORY;
-    private static String DATABASE_PATH;
+    private Nitrite dbMemory;
+    private Nitrite dbFile;
+    private ObjectRepository<Employee> repository;
 
-    public static DatabaseConnection getInstance() {
-        if (DB_CONN == null) {
-            synchronized (DatabaseConnection.class) {
-                DB_CONN = new DatabaseConnection();
-            }
-        }
-        if (DATABASE_PATH == null) {
-            DATABASE_PATH = "/tmp/test.DB";
-        }
-
-        return DB_CONN;
+    private DatabaseConnection(){
+        dbMemory = Nitrite.builder().openOrCreate();
+        repository = dbMemory.getRepository(Employee.class);
     }
 
-    private void openInMemoryConnection() {
-       DB = Nitrite.builder().openOrCreate();
-       REPOSITORY = DB.getRepository(Employee.class);
+    private  DatabaseConnection(String filePath){
+        dbFile = Nitrite.builder().filePath(filePath).openOrCreate();
+        repository = dbFile.getRepository(Employee.class);
     }
 
-    private void openFileConnection() {
-        DB = Nitrite.builder().filePath(DATABASE_PATH).openOrCreate();
-        REPOSITORY = DB.getRepository(Employee.class);
+    public static DatabaseConnection getMemoryInstance() {
+        return DB_MEMORY_CONN;
     }
 
-    private void closeConnection() {
-        DB.close();
+    public static DatabaseConnection getFileInstance() {
+        return DB_FILE_CONN;
     }
 
 
@@ -52,7 +43,6 @@ public final class DatabaseConnection {
      * @return
      */
     public List<Employee> insertIntoMemory(Employee employee) {
-        openInMemoryConnection();
         return insert(employee);
     }
 
@@ -63,7 +53,6 @@ public final class DatabaseConnection {
      * @return
      */
     public List<Employee> insertIntoFile(Employee employee) {
-        openFileConnection();
         return insert(employee);
     }
 
@@ -74,7 +63,6 @@ public final class DatabaseConnection {
      * @return
      */
     public List<Employee> findFromMemory(int offset, int size){
-        openInMemoryConnection();
         return find(offset, size);
     }
 
@@ -85,7 +73,6 @@ public final class DatabaseConnection {
      * @return
      */
     public List<Employee> findFromFile(int offset, int size){
-        openFileConnection();
         return find(offset, size);
     }
 
@@ -94,16 +81,14 @@ public final class DatabaseConnection {
         List<Employee> employees = new ArrayList<Employee>();
         WriteResult wr = null;
         try {
-            wr = REPOSITORY.insert(employee);
+            wr = repository.insert(employee);
             System.out.println("\n Affected Rows : " + wr.getAffectedCount());
-            return REPOSITORY.find().toList();
+            return repository.find().toList();
 
         } catch (Exception e) {
             System.out.println("Unable to insert transaction. ");
             e.printStackTrace();
 
-        } finally {
-            closeConnection();
         }
         return employees;
     }
@@ -113,12 +98,10 @@ public final class DatabaseConnection {
 
         List<Employee> employees = new ArrayList<Employee>();
         try {
-            employees = REPOSITORY.find(limit(offset, size)).toList();
+            employees = repository.find(limit(offset, size)).toList();
         } catch (Exception e) {
             System.out.println("Unable to find transactions. ");
             e.printStackTrace();
-        } finally {
-            closeConnection();
         }
         return employees;
     }

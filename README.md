@@ -1,6 +1,6 @@
-# Jetty REST API using Nitrite NoSql DB (in-memory and File)
+# Jetty REST API using Nitrite NoSql DB (in-memory vs File)
 
-A sample project demostrates Jetty and Nitrite integration. Currently the in-memory db seems to store only the last entry (Works more like a local variable of a method). Unlink Embedded MongoDB does not store anything beyond the scope of the method. Storing in files works like any other nosql database.
+A sample project demonstrates Jetty (Jersey REST API) and Nitrite NoSQL DB integration.
 
 To run project
 
